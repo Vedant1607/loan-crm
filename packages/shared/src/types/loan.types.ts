@@ -1,0 +1,72 @@
+export type LoanType = "PERSONAL" | "MSME_BUSINESS" | "HOME" | "VEHICLE";
+
+export type ApplicationStatus =
+  | "DRAFT"
+  | "SUBMITTED"
+  | "DOCUMENT_PENDING"
+  | "UNDER_AI_REVIEW"
+  | "UNDER_OFFICER_REVIEW"
+  | "APPROVED"
+  | "CONDITIONALLY_APPROVED"
+  | "REJECTED"
+  | "DISBURSED"
+  | "ACTIVE"
+  | "CLOSED"
+  | "NPA";
+
+export type DocumentType =
+  | "PAN_CARD"
+  | "AADHAAR_FRONT"
+  | "AADHAAR_BACK"
+  | "BANK_STATEMENT_3M"
+  | "BANK_STATEMENT_6M"
+  | "ITR_1_YEAR"
+  | "ITR_2_YEAR"
+  | "SALARY_SLIP_1M"
+  | "SALARY_SLIP_3M"
+  | "BUSINESS_PROOF"
+  | "GST_RETURNS"
+  | "PROPERTY_DOCUMENT"
+  | "VEHICLE_QUOTATION"
+  | "PHOTO"
+  | "SIGNATURE"
+  | "OTHER";
+
+export type EmiStatus =
+  | "UPCOMING"
+  | "DUE"
+  | "PAID"
+  | "OVERDUE"
+  | "PARTIAL"
+  | "WAIVED";
+
+export type EmploymentType =
+  | "SALARIED"
+  | "SELF_EMPLOYED"
+  | "BUSINESS_OWNER"
+  | "PROFESSIONAL"
+  | "AGRICULTURIST"
+  | "RETIRED"
+  | "OTHER";
+
+export const REQUIRED_DOCUMENTS: Record<LoanType, DocumentType[]> = {
+  PERSONAL: [
+    "PAN_CARD", "AADHAAR_FRONT", "AADHAAR_BACK",
+    "BANK_STATEMENT_3M", "SALARY_SLIP_1M", "PHOTO",
+  ],
+  MSME_BUSINESS: [
+    "PAN_CARD", "AADHAAR_FRONT", "AADHAAR_BACK",
+    "BANK_STATEMENT_6M", "ITR_2_YEAR", "BUSINESS_PROOF",
+    "GST_RETURNS", "PHOTO",
+  ],
+  HOME: [
+    "PAN_CARD", "AADHAAR_FRONT", "AADHAAR_BACK",
+    "BANK_STATEMENT_6M", "ITR_2_YEAR", "SALARY_SLIP_3M",
+    "PROPERTY_DOCUMENT", "PHOTO",
+  ],
+  VEHICLE: [
+    "PAN_CARD", "AADHAAR_FRONT", "AADHAAR_BACK",
+    "BANK_STATEMENT_3M", "SALARY_SLIP_1M",
+    "VEHICLE_QUOTATION", "PHOTO",
+  ],
+};
