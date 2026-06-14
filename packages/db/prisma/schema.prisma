@@ -1,0 +1,324 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  APPLICANT
+  LOAN_OFFICER
+  LENDER_ADMIN
+  SUPER_ADMIN
+}
+
+enum LoanType {
+  PERSONAL
+  MSME_BUSINESS
+  HOME
+  VEHICLE
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  DOCUMENT_PENDING
+  UNDER_AI_REVIEW
+  UNDER_OFFICER_REVIEW
+  APPROVED
+  CONDITIONALLY_APPROVED
+  REJECTED
+  DISBURSED
+  ACTIVE
+  CLOSED
+  NPA
+}
+
+enum DocumentType {
+  PAN_CARD
+  AADHAAR_FRONT
+  AADHAAR_BACK
+  BANK_STATEMENT_3M
+  BANK_STATEMENT_6M
+  ITR_1_YEAR
+  ITR_2_YEAR
+  SALARY_SLIP_1M
+  SALARY_SLIP_3M
+  BUSINESS_PROOF
+  GST_RETURNS
+  PROPERTY_DOCUMENT
+  VEHICLE_QUOTATION
+  PHOTO
+  SIGNATURE
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  UPLOADED
+  VERIFIED
+  REJECTED
+}
+
+enum EmiStatus {
+  UPCOMING
+  DUE
+  PAID
+  OVERDUE
+  PARTIAL
+  WAIVED
+}
+
+enum GenderType {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum EmploymentType {
+  SALARIED
+  SELF_EMPLOYED
+  BUSINESS_OWNER
+  PROFESSIONAL
+  AGRICULTURIST
+  RETIRED
+  OTHER
+}
+
+enum OtpPurpose {
+  LOGIN
+  VERIFY_PHONE
+}
+
+// ─── USERS ────────────────────────────────────────────────────────────────────
+
+model User {
+  id             String          @id @default(cuid())
+  name           String
+  email          String?         @unique
+  phone          String          @unique
+  phoneVerified  Boolean         @default(false)
+  role           UserRole        @default(APPLICANT)
+  isActive       Boolean         @default(true)
+  dob            DateTime?
+  gender         GenderType?
+  address        String?
+  city           String?
+  state          String?
+  pincode        String?
+  employmentType EmploymentType?
+  panEncrypted   String?
+  aadhaarLast4   String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  applications        LoanApplication[] @relation("ApplicantApplications")
+  managedApplications LoanApplication[] @relation("OfficerApplications")
+  lenderProfile       LenderOfficer?
+  auditLogs           AuditLog[]
+  otps                OtpRecord[]
+
+  @@map("users")
+}
+
+model OtpRecord {
+  id        String     @id @default(cuid())
+  userId    String?
+  phone     String
+  otp       String
+  purpose   OtpPurpose
+  expiresAt DateTime
+  verified  Boolean    @default(false)
+  attempts  Int        @default(0)
+  createdAt DateTime   @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("otp_records")
+}
+
+// ─── LENDERS ──────────────────────────────────────────────────────────────────
+
+model Lender {
+  id                   String    @id @default(cuid())
+  referenceId          String    @unique
+  name                 String
+  shortCode            String    @unique
+  logoUrl              String?
+  loanTypes            LoanType[]
+  regions              String[]
+  isPanIndia           Boolean   @default(false)
+  minAmount            Float
+  maxAmount            Float
+  minTenureMonths      Int
+  maxTenureMonths      Int
+  interestRateMin      Float
+  interestRateMax      Float
+  processingFeePercent Float     @default(1.0)
+  registrationNo       String?
+  gstin                String?
+  grievanceEmail       String?
+  grievancePhone       String?
+  websiteUrl           String?
+  isActive             Boolean   @default(true)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  applications LoanApplication[]
+  officers     LenderOfficer[]
+
+  @@map("lenders")
+}
+
+model LenderOfficer {
+  id       String @id @default(cuid())
+  userId   String @unique
+  lenderId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lender Lender @relation(fields: [lenderId], references: [id], onDelete: Cascade)
+
+  @@map("lender_officers")
+}
+
+// ─── LOAN APPLICATIONS ────────────────────────────────────────────────────────
+
+model LoanApplication {
+  id                    String            @id @default(cuid())
+  applicationNo         String            @unique
+  applicantId           String
+  lenderId              String
+  officerId             String?
+  loanType              LoanType
+  loanAmount            Float
+  tenureMonths          Int
+  purpose               String
+  status                ApplicationStatus @default(DRAFT)
+  applicantName         String
+  dob                   DateTime
+  gender                GenderType?
+  address               String
+  city                  String
+  state                 String
+  pincode               String
+  panEncrypted          String
+  aadhaarLast4          String
+  employmentType        EmploymentType
+  employerName          String?
+  monthlyIncome         Float
+  existingEmiObligations Float            @default(0)
+  businessName          String?
+  businessType          String?
+  gstNumber             String?
+  businessVintage       Int?
+  annualTurnover        Float?
+  propertyAddress       String?
+  propertyValue         Float?
+  vehicleMake           String?
+  vehicleModel          String?
+  vehicleYear           Int?
+  vehiclePrice          Float?
+  sanctionedAmount      Float?
+  sanctionedTenure      Int?
+  sanctionedRate        Float?
+  officerNotes          String?           @db.Text
+  rejectionReason       String?           @db.Text
+  conditionsForApproval String?           @db.Text
+  aiAnalysisMongoId     String?
+  aiRiskScore           Float?
+  aiRecommendation      String?
+  aiAnalyzedAt          DateTime?
+  submittedAt           DateTime?
+  reviewedAt            DateTime?
+  decisionAt            DateTime?
+  disbursedAt           DateTime?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  applicant   User            @relation("ApplicantApplications", fields: [applicantId], references: [id])
+  lender      Lender          @relation(fields: [lenderId], references: [id])
+  officer     User?           @relation("OfficerApplications", fields: [officerId], references: [id])
+  documents   LoanDocument[]
+  emiSchedule EmiSchedule[]
+  auditLogs   AuditLog[]
+
+  @@map("loan_applications")
+}
+
+// ─── DOCUMENTS ────────────────────────────────────────────────────────────────
+
+model LoanDocument {
+  id              String         @id @default(cuid())
+  applicationId   String
+  type            DocumentType
+  fileName        String
+  fileSize        Int
+  mimeType        String
+  r2Key           String
+  status          DocumentStatus @default(PENDING)
+  rejectionReason String?
+  uploadedAt      DateTime       @default(now())
+  verifiedAt      DateTime?
+
+  application LoanApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("loan_documents")
+}
+
+// ─── EMI SCHEDULE ─────────────────────────────────────────────────────────────
+
+model EmiSchedule {
+  id              String    @id @default(cuid())
+  applicationId   String
+  installmentNo   Int
+  dueDate         DateTime
+  principalAmount Float
+  interestAmount  Float
+  totalAmount     Float
+  paidAmount      Float     @default(0)
+  status          EmiStatus @default(UPCOMING)
+  penaltyAmount   Float     @default(0)
+  penaltyRate     Float     @default(2.0)
+  paidAt          DateTime?
+  paymentRef      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  application LoanApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, installmentNo])
+  @@map("emi_schedules")
+}
+
+// ─── AUDIT LOG ────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  userId        String
+  action        String
+  entity        String
+  entityId      String
+  oldValue      Json?
+  newValue      Json?
+  metadata      Json?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  user        User             @relation(fields: [userId], references: [id])
+  application LoanApplication? @relation(fields: [entityId], references: [id])
+
+  @@index([userId])
+  @@index([entityId])
+  @@index([action])
+  @@map("audit_logs")
+}
