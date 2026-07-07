@@ -1,5 +1,4 @@
 import { prisma } from "@loan-crm/db";
-import crypto from "crypto";
 
 // Generates a 6-digit OTP and saves it to DB
 export async function generateAndSaveOtp(phone: string): Promise<string> {
