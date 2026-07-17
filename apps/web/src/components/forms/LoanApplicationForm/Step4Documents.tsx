@@ -4,7 +4,7 @@ import type { ApplicationFormData } from "@/app/(applicant)/apply/new/page";
 interface Props {
   onNext: (data: Partial<ApplicationFormData>) => void;
   onBack: () => void;
-  defaultValues: Partial<ApplicationFormData>;
+  formData: Partial<ApplicationFormData>;
 }
 
 export default function Step4LoanDetails({ onBack }: Props) {

@@ -89,7 +89,7 @@ export default function Step1Personal({ onNext, defaultValues }: Props) {
               <Label>Gender</Label>
               <Select
                 defaultValue={defaultValues.gender}
-                onValueChange={(v) =>
+                onValueChange={(v: string) =>
                   setValue("gender", v as FormData["gender"])
                 }
               >
@@ -134,7 +134,7 @@ export default function Step1Personal({ onNext, defaultValues }: Props) {
               <Label>State</Label>
               <Select
                 defaultValue={defaultValues.state}
-                onValueChange={(v) => setValue("state", v)}
+                onValueChange={(v: string) => setValue("state", v)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="State" />
@@ -170,7 +170,7 @@ export default function Step1Personal({ onNext, defaultValues }: Props) {
             <Label>Employment Type</Label>
             <Select
               defaultValue={defaultValues.employmentType}
-              onValueChange={(v) =>
+              onValueChange={(v: string) =>
                 setValue("employmentType", v as FormData["employmentType"])
               }
             >
