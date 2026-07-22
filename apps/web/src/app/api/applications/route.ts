@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@loan-crm/db";
+import { prisma, EmploymentType } from "@loan-crm/db";
 import { assignLender } from "@/lib/lenderAssignment";
 import { generateApplicationNo } from "@/lib/referenceId";
 import { z } from "zod";
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
         pincode: data.pincode,
         panEncrypted,
         aadhaarLast4: data.aadhaarLast4,
-        employmentType: data.employmentType as any,
+        employmentType: data.employmentType as EmploymentType,
         monthlyIncome: data.monthlyIncome,
         existingEmiObligations: data.existingEmiObligations,
         businessName: data.businessName,
@@ -129,10 +129,11 @@ export async function POST(req: NextRequest) {
       applicationId: application.id,
       applicationNo: application.applicationNo,
     });
-  } catch (err: any) {
-    console.error("[POST /api/applications]", err);
+  } catch (err) {
+    const error = err as Error;
+    console.error("[POST /api/applications]", error);
     return NextResponse.json(
-      { error: err.message ?? "Failed to submit application" },
+      { error: error.message ?? "Failed to submit application" },
       { status: 500 },
     );
   }
