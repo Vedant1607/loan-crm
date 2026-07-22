@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { INDIAN_STATES } from "@loan-crm/shared";
+import { Separator } from "@/components/ui/separator";
 import type { ApplicationFormData } from "@/app/(applicant)/apply/new/page";
 
 interface Props {
@@ -19,37 +19,32 @@ const LOAN_TYPE_LABELS: Record<string, string> = {
   VEHICLE: "Vehicle Loan",
 };
 
-function ReviewRow({
-  label,
-  value,
-}: {
-  label: string;
-  value?: string | number;
-}) {
-  if (!value && value !== 0) return null;
+const DOC_LABELS: Record<string, string> = {
+  PAN_CARD: "PAN Card",
+  AADHAAR_FRONT: "Aadhaar (Front)",
+  AADHAAR_BACK: "Aadhaar (Back)",
+  BANK_STATEMENT_3M: "Bank Statement 3M",
+  BANK_STATEMENT_6M: "Bank Statement 6M",
+  ITR_1_YEAR: "ITR 1 Year",
+  ITR_2_YEAR: "ITR 2 Years",
+  SALARY_SLIP_1M: "Salary Slip 1M",
+  SALARY_SLIP_3M: "Salary Slip 3M",
+  BUSINESS_PROOF: "Business Proof",
+  GST_RETURNS: "GST Returns",
+  PROPERTY_DOCUMENT: "Property Document",
+  VEHICLE_QUOTATION: "Vehicle Quotation",
+  PHOTO: "Photo",
+  SIGNATURE: "Signature",
+  OTHER: "Other",
+};
+
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between py-2 border-b border-slate-100 last:border-0">
-      <span className="text-sm text-slate-500">{label}</span>
-      <span className="text-sm font-medium text-slate-900 text-right max-w-xs">
+    <div className="flex justify-between py-1.5 text-sm">
+      <span className="text-slate-500">{label}</span>
+      <span className="text-slate-900 font-medium text-right max-w-[60%]">
         {value}
       </span>
-    </div>
-  );
-}
-
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
-        {title}
-      </p>
-      {children}
     </div>
   );
 }
@@ -64,201 +59,213 @@ export default function Step5Review({ onBack, formData }: Props) {
     setError("");
 
     try {
-      // Build document keys + meta from the files stored in formData
-      const documentKeys: Record<string, string> = {};
-      const documentMeta: Record<
-        string,
-        {
-          fileName: string;
-          fileSize: number;
-          mimeType: string;
-        }
-      > = {};
-
-      // Documents were uploaded in Step 4 — we re-upload here
-      // to get fresh r2Keys tied to the real applicationId after creation
-      for (const [docType, file] of Object.entries(formData.documents ?? {})) {
-        const fd = new FormData();
-        fd.append("file", file as File);
-        fd.append("documentType", docType);
-
-        const res = await fetch("/api/documents/upload", {
-          method: "POST",
-          body: fd,
-        });
-        const data = await res.json();
-
-        if (!res.ok) {
-          setError(`Failed to upload ${docType}: ${data.error}`);
-          setLoading(false);
-          return;
-        }
-
-        documentKeys[docType] = data.r2Key;
-        documentMeta[docType] = {
-          fileName: (file as File).name,
-          fileSize: (file as File).size,
-          mimeType: (file as File).type,
-        };
-      }
-
-      // Submit the application
+      // 1. Submit application metadata
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          dob: formData.dob,
+          gender: formData.gender,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
+          employmentType: formData.employmentType,
           pan: formData.pan,
+          aadhaarLast4: formData.aadhaarLast4,
+          loanType: formData.loanType,
+          loanAmount: formData.loanAmount,
           tenure: formData.tenure,
-          documentKeys,
-          documentMeta,
+          purpose: formData.purpose,
+          monthlyIncome: formData.monthlyIncome,
+          existingEmiObligations: formData.existingEmiObligations,
+          businessName: formData.businessName,
+          businessType: formData.businessType,
+          gstNumber: formData.gstNumber,
+          businessVintage: formData.businessVintage,
+          annualTurnover: formData.annualTurnover,
         }),
       });
 
-      const data = await res.json();
+      const result = await res.json();
 
       if (!res.ok) {
-        setError(data.error ?? "Submission failed. Please try again.");
-        setLoading(false);
+        setError(result.error ?? "Submission failed");
         return;
       }
 
-      // Success — redirect to the application status page
-      router.push(`/apply/${data.id}?submitted=true`);
+      // 2. Upload documents one by one
+      if (formData.documents) {
+        for (const [docType, file] of Object.entries(formData.documents)) {
+          const fd = new FormData();
+          fd.append("file", file as File);
+          fd.append("docType", docType);
+
+          await fetch(`/api/applications/${result.applicationId}/documents`, {
+            method: "POST",
+            body: fd,
+          });
+        }
+      }
+
+      // 3. Redirect to application status page
+      router.push(`/apply/${result.applicationId}?submitted=true`);
     } catch {
       setError("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
 
+  const docCount = Object.keys(formData.documents ?? {}).length;
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Review & Submit</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        <p className="text-sm text-slate-500">
-          Please review all details before submitting. You cannot edit after
-          submission.
-        </p>
-
-        {/* Personal Details */}
-        <Section title="Personal Details">
-          <ReviewRow label="Full Name" value={formData.name} />
-          <ReviewRow label="Date of Birth" value={formData.dob} />
-          <ReviewRow label="Gender" value={formData.gender} />
-          <ReviewRow label="Address" value={formData.address} />
-          <ReviewRow label="City" value={formData.city} />
-          <ReviewRow
-            label="State"
-            value={INDIAN_STATES[formData.state] ?? formData.state}
-          />
-          <ReviewRow label="Pincode" value={formData.pincode} />
-          <ReviewRow label="Employment Type" value={formData.employmentType} />
-          <ReviewRow label="PAN" value={`${formData.pan.slice(0, 3)}XXXXXXX`} />
-          <ReviewRow
-            label="Aadhaar (Last 4)"
-            value={`XXXX XXXX ${formData.aadhaarLast4}`}
-          />
-        </Section>
-
-        {/* Loan Details */}
-        <Section title="Loan Details">
-          <ReviewRow
-            label="Loan Type"
-            value={LOAN_TYPE_LABELS[formData.loanType]}
-          />
-          <ReviewRow
-            label="Loan Amount"
-            value={`₹${Number(formData.loanAmount).toLocaleString("en-IN")}`}
-          />
-          <ReviewRow label="Tenure" value={`${formData.tenure} months`} />
-          <ReviewRow label="Purpose" value={formData.purpose} />
-          <ReviewRow
-            label="Monthly Income"
-            value={`₹${Number(formData.monthlyIncome).toLocaleString("en-IN")}`}
-          />
-          <ReviewRow
-            label="Existing EMI Obligations"
-            value={`₹${Number(formData.existingEmiObligations).toLocaleString("en-IN")}`}
-          />
-        </Section>
-
-        {/* Business Details (MSME only) */}
-        {formData.loanType === "MSME_BUSINESS" && (
-          <Section title="Business Details">
-            <ReviewRow label="Business Name" value={formData.businessName} />
-            <ReviewRow label="Business Type" value={formData.businessType} />
-            <ReviewRow label="GST Number" value={formData.gstNumber} />
-            <ReviewRow
-              label="Years in Business"
-              value={formData.businessVintage}
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Review Your Application</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Personal Details */}
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+              Personal Details
+            </p>
+            <Row label="Full Name" value={formData.name} />
+            <Row label="Date of Birth" value={formData.dob} />
+            <Row label="Gender" value={formData.gender} />
+            <Row
+              label="Address"
+              value={`${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`}
             />
-            <ReviewRow
-              label="Annual Turnover"
-              value={
-                formData.annualTurnover
-                  ? `₹${Number(formData.annualTurnover).toLocaleString("en-IN")}`
-                  : undefined
-              }
+            <Row
+              label="Employment"
+              value={formData.employmentType.replace(/_/g, " ")}
             />
-          </Section>
-        )}
+            <Row label="PAN" value={`${formData.pan.slice(0, 3)}XXXXXXX`} />
+            <Row
+              label="Aadhaar Last 4"
+              value={`XXXX XXXX ${formData.aadhaarLast4}`}
+            />
+          </div>
 
-        {/* Documents */}
-        <Section title="Documents">
-          {Object.keys(formData.documents ?? {}).map((docType) => (
-            <div
-              key={docType}
-              className="flex justify-between py-2 border-b border-slate-100 last:border-0"
-            >
-              <span className="text-sm text-slate-500">
-                {docType.replace(/_/g, " ")}
-              </span>
-              <span className="text-sm text-green-600 font-medium">
-                ✓ Uploaded
-              </span>
+          <Separator />
+
+          {/* Loan Details */}
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+              Loan Details
+            </p>
+            <Row
+              label="Loan Type"
+              value={LOAN_TYPE_LABELS[formData.loanType]}
+            />
+            <Row
+              label="Amount"
+              value={`₹${formData.loanAmount.toLocaleString("en-IN")}`}
+            />
+            <Row label="Tenure" value={`${formData.tenure} months`} />
+            <Row
+              label="Monthly Income"
+              value={`₹${formData.monthlyIncome.toLocaleString("en-IN")}`}
+            />
+            <Row
+              label="Existing EMIs"
+              value={`₹${formData.existingEmiObligations.toLocaleString("en-IN")}`}
+            />
+            <Row label="Purpose" value={formData.purpose} />
+          </div>
+
+          {/* Business Details (MSME only) */}
+          {formData.loanType === "MSME_BUSINESS" && formData.businessName && (
+            <>
+              <Separator />
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+                  Business Details
+                </p>
+                <Row label="Business Name" value={formData.businessName} />
+                <Row
+                  label="Business Type"
+                  value={formData.businessType ?? "—"}
+                />
+                <Row
+                  label="GST Number"
+                  value={formData.gstNumber ?? "Not provided"}
+                />
+                <Row
+                  label="Years in Business"
+                  value={`${formData.businessVintage ?? 0} years`}
+                />
+                <Row
+                  label="Annual Turnover"
+                  value={`₹${(formData.annualTurnover ?? 0).toLocaleString("en-IN")}`}
+                />
+              </div>
+            </>
+          )}
+
+          <Separator />
+
+          {/* Documents */}
+          <div>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+              Documents ({docCount} files ready to upload)
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {Object.keys(formData.documents ?? {}).map((docType) => (
+                <span
+                  key={docType}
+                  className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full"
+                >
+                  ✓ {DOC_LABELS[docType] ?? docType}
+                </span>
+              ))}
             </div>
-          ))}
-        </Section>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Declaration */}
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+      {/* Declaration */}
+      <Card className="border-slate-200">
+        <CardContent className="pt-4">
           <p className="text-xs text-slate-500 leading-relaxed">
             By submitting this application, I declare that all information
-            provided is true and accurate to the best of my knowledge. I
-            authorise the lender to verify my details with credit bureaus,
-            government databases, and financial institutions as required under
-            RBI guidelines. I have read and agree to the Fair Practices Code.
+            provided is true and correct. I authorise LoanFlow and its lending
+            partners to verify my details, pull my credit report, and contact me
+            regarding this application. I have read and agree to the{" "}
+            <span className="underline">Terms & Conditions</span> and{" "}
+            <span className="underline">Privacy Policy</span>.
           </p>
-        </div>
+        </CardContent>
+      </Card>
 
-        {error && (
-          <p className="text-sm text-red-500 bg-red-50 border border-red-200 px-3 py-2 rounded-md">
-            {error}
-          </p>
-        )}
+      {error && (
+        <p className="text-sm text-red-500 bg-red-50 px-4 py-3 rounded-lg">
+          {error}
+        </p>
+      )}
 
-        <div className="flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={onBack}
-            disabled={loading}
-          >
-            ← Back
-          </Button>
-          <Button
-            type="button"
-            className="flex-1"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? "Submitting..." : "Submit Application →"}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="flex gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1"
+          onClick={onBack}
+          disabled={loading}
+        >
+          ← Back
+        </Button>
+        <Button
+          type="button"
+          className="flex-1"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? "Submitting..." : "Submit Application →"}
+        </Button>
+      </div>
+    </div>
   );
 }

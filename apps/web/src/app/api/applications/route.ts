@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@loan-crm/db";
-import { z } from "zod";
 import { assignLender } from "@/lib/lenderAssignment";
 import { generateApplicationNo } from "@/lib/referenceId";
+import { z } from "zod";
 
 const schema = z.object({
   // Step 1
   name: z.string().min(3),
   dob: z.string(),
-  gender: z.string(),
+  gender: z.enum(["MALE", "FEMALE", "OTHER"]),
   address: z.string(),
   city: z.string(),
   state: z.string(),
@@ -18,7 +18,7 @@ const schema = z.object({
   pan: z.string(),
   aadhaarLast4: z.string().length(4),
   // Step 2
-  loanType: z.string(),
+  loanType: z.enum(["PERSONAL", "MSME_BUSINESS", "HOME", "VEHICLE"]),
   loanAmount: z.number(),
   tenure: z.number(),
   purpose: z.string(),
@@ -30,15 +30,6 @@ const schema = z.object({
   gstNumber: z.string().optional(),
   businessVintage: z.number().optional(),
   annualTurnover: z.number().optional(),
-  // Step 4 — document r2Keys
-  documentKeys: z.record(z.string()),
-  documentMeta: z.record(
-    z.object({
-      fileName: z.string(),
-      fileSize: z.number(),
-      mimeType: z.string(),
-    }),
-  ),
 });
 
 export async function POST(req: NextRequest) {
@@ -53,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid data", details: parsed.error.flatten() },
+        { error: parsed.error.errors[0].message },
         { status: 400 },
       );
     }
@@ -62,130 +53,86 @@ export async function POST(req: NextRequest) {
 
     // 1. Assign lender
     const lenderId = await assignLender(
-      data.loanType as any,
+      data.loanType,
       data.state,
       data.loanAmount,
     );
 
+    // 2. Get lender short code for application number
     const lender = await prisma.lender.findUnique({
       where: { id: lenderId },
+      select: { shortCode: true },
     });
 
     if (!lender) {
       return NextResponse.json(
         { error: "No lender available for this loan type and region" },
-        { status: 422 },
+        { status: 400 },
       );
     }
 
-    // 2. Generate application number
+    // 3. Generate application number
     const applicationNo = await generateApplicationNo(lender.shortCode);
 
-    // 3. Encrypt PAN (basic in dev — replace with AES-256 in prod)
+    // 4. Simple encryption placeholder — replace with real AES-256 in prod
     const panEncrypted = Buffer.from(data.pan).toString("base64");
 
-    // 4. Create application + documents in a transaction
-    const application = await prisma.$transaction(async (tx) => {
-      const app = await tx.loanApplication.create({
-        data: {
+    // 5. Create application in DB
+    const application = await prisma.loanApplication.create({
+      data: {
+        applicationNo,
+        applicantId: session.user.id,
+        lenderId,
+        loanType: data.loanType,
+        loanAmount: data.loanAmount,
+        tenureMonths: data.tenure,
+        purpose: data.purpose,
+        status: "SUBMITTED",
+        applicantName: data.name,
+        dob: new Date(data.dob),
+        gender: data.gender,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        pincode: data.pincode,
+        panEncrypted,
+        aadhaarLast4: data.aadhaarLast4,
+        employmentType: data.employmentType as any,
+        monthlyIncome: data.monthlyIncome,
+        existingEmiObligations: data.existingEmiObligations,
+        businessName: data.businessName,
+        businessType: data.businessType,
+        gstNumber: data.gstNumber,
+        businessVintage: data.businessVintage,
+        annualTurnover: data.annualTurnover,
+        submittedAt: new Date(),
+      },
+    });
+
+    // 6. Audit log
+    await prisma.auditLog.create({
+      data: {
+        userId: session.user.id,
+        action: "APPLICATION_SUBMITTED",
+        entity: "LoanApplication",
+        entityId: application.id,
+        newValue: {
           applicationNo,
-          applicantId: session.user.id,
-          lenderId,
-          loanType: data.loanType as any,
+          loanType: data.loanType,
           loanAmount: data.loanAmount,
-          tenureMonths: data.tenure,
-          purpose: data.purpose,
-          status: "SUBMITTED",
-          applicantName: data.name,
-          dob: new Date(data.dob),
-          gender: data.gender as any,
-          address: data.address,
-          city: data.city,
-          state: data.state,
-          pincode: data.pincode,
-          panEncrypted,
-          aadhaarLast4: data.aadhaarLast4,
-          employmentType: data.employmentType as any,
-          monthlyIncome: data.monthlyIncome,
-          existingEmiObligations: data.existingEmiObligations,
-          businessName: data.businessName,
-          businessType: data.businessType,
-          gstNumber: data.gstNumber,
-          businessVintage: data.businessVintage,
-          annualTurnover: data.annualTurnover,
-          submittedAt: new Date(),
         },
-      });
-
-      // Create document records
-      const docEntries = Object.entries(data.documentKeys);
-      for (const [docType, r2Key] of docEntries) {
-        const meta = data.documentMeta[docType];
-        if (!meta) continue;
-
-        await tx.loanDocument.create({
-          data: {
-            applicationId: app.id,
-            type: docType as any,
-            fileName: meta.fileName,
-            fileSize: meta.fileSize,
-            mimeType: meta.mimeType,
-            r2Key,
-            status: "UPLOADED",
-          },
-        });
-      }
-
-      // Audit log
-      await tx.auditLog.create({
-        data: {
-          userId: session.user.id,
-          action: "APPLICATION_SUBMITTED",
-          entity: "LoanApplication",
-          entityId: app.id,
-          newValue: { applicationNo, lenderId, loanType: data.loanType },
-        },
-      });
-
-      return app;
+      },
     });
 
     return NextResponse.json({
-      id: application.id,
+      success: true,
+      applicationId: application.id,
       applicationNo: application.applicationNo,
     });
   } catch (err: any) {
-    console.error("[applications/POST]", err);
-
-    if (err.message?.includes("No lender available")) {
-      return NextResponse.json({ error: err.message }, { status: 422 });
-    }
-
+    console.error("[POST /api/applications]", err);
     return NextResponse.json(
-      { error: "Failed to submit application" },
-      { status: 500 },
-    );
-  }
-}
-
-export async function GET(req: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const applications = await prisma.loanApplication.findMany({
-      where: { applicantId: session.user.id },
-      include: { lender: { select: { name: true, referenceId: true } } },
-      orderBy: { createdAt: "desc" },
-    });
-
-    return NextResponse.json(applications);
-  } catch (err) {
-    console.error("[applications/GET]", err);
-    return NextResponse.json(
-      { error: "Failed to fetch applications" },
+      { error: err.message ?? "Failed to submit application" },
       { status: 500 },
     );
   }
