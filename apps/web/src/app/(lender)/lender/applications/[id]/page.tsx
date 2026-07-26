@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import DecisionPanel from "@/components/dashboard/DecisionPanel";
 import AIAnalysisReport from "@/components/dashboard/AIAnalysisReport";
+import RevealPanButton from "@/components/dashboard/RevealPanButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -109,7 +110,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
               <Row label="Employment" value={app.employmentType.replace(/_/g, " ")} />
               <Row label="Address" value={`${app.address}, ${app.city}, ${app.state} - ${app.pincode}`} />
               <Separator className="my-2" />
-              <Row label="PAN" value="Encrypted (view on request)" />
+              <RevealPanButton applicationId={app.id}/>
               <Row label="Aadhaar" value={`XXXX XXXX ${app.aadhaarLast4}`} />
             </CardContent>
           </Card>

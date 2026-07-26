@@ -4,6 +4,7 @@ import { prisma, EmploymentType } from "@loan-crm/db";
 import { assignLender } from "@/lib/lenderAssignment";
 import { generateApplicationNo } from "@/lib/referenceId";
 import { z } from "zod";
+import { encrypt } from "@/lib/encryption";
 
 const schema = z.object({
   // Step 1
@@ -74,8 +75,8 @@ export async function POST(req: NextRequest) {
     // 3. Generate application number
     const applicationNo = await generateApplicationNo(lender.shortCode);
 
-    // 4. Simple encryption placeholder — replace with real AES-256 in prod
-    const panEncrypted = Buffer.from(data.pan).toString("base64");
+    // 4. Encrypt PAN with AES-256-GCM before storing (RBI/DPDP compliance)
+    const panEncrypted = encrypt(data.pan);
 
     // 5. Create application in DB
     const application = await prisma.loanApplication.create({
