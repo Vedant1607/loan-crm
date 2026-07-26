@@ -9,24 +9,22 @@ interface Props {
   isActive: boolean;
 }
 
-export default function ToggleLenderStatusButton({ lenderId, isActive }: Props) {
+export default function ToggleLenderStatusButton({
+  lenderId,
+  isActive,
+}: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleToggle = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/lenders/${lenderId}`, {
+      await fetch(`/api/lenders/${lenderId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !isActive }),
       });
-
-      if (res.ok) {
-        router.refresh();
-      }
-    } catch (err) {
-      console.error("Failed to toggle lender status", err);
+      router.refresh();
     } finally {
       setLoading(false);
     }
@@ -34,12 +32,17 @@ export default function ToggleLenderStatusButton({ lenderId, isActive }: Props) 
 
   return (
     <Button
-      size="xs"
+      size="sm"
       variant="outline"
       onClick={handleToggle}
       disabled={loading}
+      className={
+        isActive
+          ? "text-red-600 hover:text-red-700"
+          : "text-green-600 hover:text-green-700"
+      }
     >
-      {loading ? "Updating..." : isActive ? "Deactivate" : "Activate"}
+      {loading ? "..." : isActive ? "Deactivate" : "Activate"}
     </Button>
   );
 }
