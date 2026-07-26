@@ -14,9 +14,11 @@ const schema = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
+
     const session = await auth();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -48,7 +50,7 @@ export async function POST(
 
     // Fetch application
     const application = await prisma.loanApplication.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!application) {
@@ -96,7 +98,7 @@ export async function POST(
       // Update application + create EMI schedule in a transaction
       await prisma.$transaction([
         prisma.loanApplication.update({
-          where: { id: params.id },
+          where: { id },
           data: {
             status: "APPROVED",
             sanctionedAmount,
@@ -109,7 +111,7 @@ export async function POST(
         }),
         prisma.emiSchedule.createMany({
           data: schedule.map((inst) => ({
-            applicationId: params.id,
+            applicationId: id,
             installmentNo: inst.installmentNo,
             dueDate: inst.dueDate,
             principalAmount: inst.principalAmount,
@@ -123,7 +125,7 @@ export async function POST(
             userId: session.user.id,
             action: "LOAN_APPROVED",
             entity: "LoanApplication",
-            entityId: params.id,
+            entityId: id,
             newValue: {
               sanctionedAmount,
               sanctionedRate,
@@ -143,7 +145,7 @@ export async function POST(
     // REJECT
     await prisma.$transaction([
       prisma.loanApplication.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           status: "REJECTED",
           rejectionReason: notes,
@@ -156,7 +158,7 @@ export async function POST(
           userId: session.user.id,
           action: "LOAN_REJECTED",
           entity: "LoanApplication",
-          entityId: params.id,
+          entityId: id,
           newValue: { rejectionReason: notes },
         },
       }),

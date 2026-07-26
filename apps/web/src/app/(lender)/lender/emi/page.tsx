@@ -3,7 +3,7 @@ import { prisma } from "@loan-crm/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { format, isPast } from "date-fns";
+import { format } from "date-fns";
 import RecordPaymentButton from "@/components/dashboard/RecordPaymentButton";
 
 const EMI_STATUS_STYLES: Record<string, string> = {
@@ -51,9 +51,6 @@ export default async function LenderEmiPage() {
   });
 
   const overdueEmis = emis.filter((e) => e.status === "OVERDUE");
-  const dueTodayEmis = emis.filter(
-    (e) => e.status !== "OVERDUE" && isPast(new Date(e.dueDate)),
-  );
 
   return (
     <div className="space-y-6">

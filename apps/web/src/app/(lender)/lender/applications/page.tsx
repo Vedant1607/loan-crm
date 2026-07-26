@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { prisma } from "@loan-crm/db";
+import { prisma, Prisma, ApplicationStatus, LoanType } from "@loan-crm/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,7 +42,7 @@ export default async function ApplicationsListPage({ searchParams }: Props) {
   });
 
   // Build where clause with filters
-  const whereClause: any = {};
+  const whereClause: Prisma.LoanApplicationWhereInput = {};
 
   if (session.user.role !== "SUPER_ADMIN") {
     if (officerProfile) {
@@ -53,11 +53,11 @@ export default async function ApplicationsListPage({ searchParams }: Props) {
   }
 
   if (searchParams.status && searchParams.status !== "ALL") {
-    whereClause.status = searchParams.status;
+    whereClause.status = searchParams.status as ApplicationStatus;
   }
 
   if (searchParams.loanType && searchParams.loanType !== "ALL") {
-    whereClause.loanType = searchParams.loanType;
+    whereClause.loanType = searchParams.loanType as LoanType;
   }
 
   if (searchParams.search) {

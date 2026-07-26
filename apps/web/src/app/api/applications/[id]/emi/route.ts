@@ -4,16 +4,18 @@ import { prisma } from "@loan-crm/db";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
+
     const session = await auth();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const application = await prisma.loanApplication.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { applicantId: true, lenderId: true },
     });
 
@@ -30,7 +32,7 @@ export async function GET(
     }
 
     const schedule = await prisma.emiSchedule.findMany({
-      where: { applicationId: params.id },
+      where: { applicationId: id },
       orderBy: { installmentNo: "asc" },
     });
 
@@ -49,7 +51,7 @@ export async function GET(
 
     // Re-fetch after status updates
     const updated = await prisma.emiSchedule.findMany({
-      where: { applicationId: params.id },
+      where: { applicationId: id },
       orderBy: { installmentNo: "asc" },
     });
 

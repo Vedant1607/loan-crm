@@ -10,9 +10,11 @@ const schema = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
+
     const session = await auth();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -36,7 +38,7 @@ export async function POST(
     const { amountPaid, paymentRef } = parsed.data;
 
     const emi = await prisma.emiSchedule.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!emi) {
@@ -57,7 +59,7 @@ export async function POST(
     const isFullyPaid = newPaidAmount >= emi.totalAmount + emi.penaltyAmount;
 
     const updated = await prisma.emiSchedule.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         paidAmount: newPaidAmount,
         paymentRef: paymentRef ?? null,

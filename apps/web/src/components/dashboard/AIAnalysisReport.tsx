@@ -1,8 +1,4 @@
-"use client";
-
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 interface Props {
   applicationId: string;
@@ -12,40 +8,25 @@ interface Props {
 }
 
 export default function AIAnalysisReport({
-  applicationId,
   riskScore,
   recommendation,
   analyzedAt,
 }: Props) {
-  const [loading, setLoading] = useState(false);
-
-  const triggerAnalysis = async () => {
-    setLoading(true);
-    try {
-      await fetch("/api/ai/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ applicationId }),
-      });
-      window.location.reload();
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // AI analysis is disabled for now — manual review only.
+  // This component will be re-enabled once the AI service (Step 20+) is connected.
   if (!analyzedAt) {
     return (
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
-            AI Risk Analysis
+            Risk Assessment
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-center py-6">
-          <p className="text-sm text-slate-400 mb-3">Not yet analyzed</p>
-          <Button size="sm" onClick={triggerAnalysis} disabled={loading}>
-            {loading ? "Analyzing..." : "Run AI Analysis"}
-          </Button>
+        <CardContent className="py-6 text-center">
+          <p className="text-sm text-slate-400">📋 Manual review mode</p>
+          <p className="text-xs text-slate-400 mt-1">
+            Review uploaded documents and use your judgement to make a decision.
+          </p>
         </CardContent>
       </Card>
     );
@@ -78,10 +59,6 @@ export default function AIAnalysisReport({
             {recommendation?.replace(/_/g, " ")}
           </p>
         </div>
-        <p className="text-xs text-slate-400 text-center">
-          Full detailed report will be shown here once AI service is connected
-          (Step 20+)
-        </p>
       </CardContent>
     </Card>
   );

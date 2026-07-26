@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma, DocumentType } from "@loan-crm/db";
-
-// Temporary local storage for dev — we'll swap for R2 in a later step
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 
 export async function POST(
   req: NextRequest,
@@ -12,6 +9,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
+
     const session = await auth();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,7 +32,7 @@ export async function POST(
 
     const formData = await req.formData();
     const file = formData.get("file") as File;
-    const docType = formData.get("docType") as string;
+    const docType = formData.get("docType") as DocumentType;
 
     if (!file || !docType) {
       return NextResponse.json(
@@ -43,7 +41,6 @@ export async function POST(
       );
     }
 
-    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json(
         { error: "File too large. Max 5MB." },
@@ -51,31 +48,36 @@ export async function POST(
       );
     }
 
-    // Save locally in dev (uploads/applicationId/docType.ext)
     const ext = file.name.split(".").pop();
-    const r2Key = `uploads/${id}/${docType}.${ext}`;
-    const localDir = path.join(process.cwd(), "public", "uploads", id);
+    const blobPath = `applications/${id}/${docType}-${Date.now()}.${ext}`;
 
-    await mkdir(localDir, { recursive: true });
+    // Upload to Vercel Blob — returns a public HTTPS URL
+    const blob = await put(blobPath, file, {
+      access: "public",
+    });
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await writeFile(path.join(localDir, `${docType}.${ext}`), buffer);
+    // Remove any previous document of the same type for this application
+    await prisma.loanDocument.deleteMany({
+      where: { applicationId: id, type: docType },
+    });
 
-    // Save document record in DB
     const doc = await prisma.loanDocument.create({
       data: {
         applicationId: id,
-        type: docType as DocumentType,
+        type: docType,
         fileName: file.name,
         fileSize: file.size,
         mimeType: file.type,
-        r2Key,
+        r2Key: blob.url, // storing the full blob URL here
         status: "UPLOADED",
       },
     });
 
-    return NextResponse.json({ success: true, documentId: doc.id });
+    return NextResponse.json({
+      success: true,
+      documentId: doc.id,
+      url: blob.url,
+    });
   } catch (err) {
     console.error("[POST /api/applications/[id]/documents]", err);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
