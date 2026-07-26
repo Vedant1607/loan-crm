@@ -11,15 +11,15 @@ import {
 } from "@/components/ui/select";
 
 interface Props {
-  userId: string;
+  userId:      string;
   currentRole: string;
 }
 
 const ROLES = [
-  { value: "APPLICANT", label: "Applicant" },
+  { value: "APPLICANT",    label: "Applicant" },
   { value: "LOAN_OFFICER", label: "Loan Officer" },
   { value: "LENDER_ADMIN", label: "Lender Admin" },
-  { value: "SUPER_ADMIN", label: "Super Admin" },
+  { value: "SUPER_ADMIN",  label: "Super Admin" },
 ];
 
 export default function ChangeUserRoleButton({ userId, currentRole }: Props) {
@@ -31,9 +31,9 @@ export default function ChangeUserRoleButton({ userId, currentRole }: Props) {
     setLoading(true);
     try {
       await fetch(`/api/admin/users/${userId}/role`, {
-        method: "PATCH",
+        method:  "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
+        body:    JSON.stringify({ role }),
       });
       router.refresh();
     } finally {
@@ -42,19 +42,13 @@ export default function ChangeUserRoleButton({ userId, currentRole }: Props) {
   };
 
   return (
-    <Select
-      defaultValue={currentRole}
-      onValueChange={handleChange}
-      disabled={loading}
-    >
+    <Select defaultValue={currentRole} onValueChange={handleChange} disabled={loading}>
       <SelectTrigger className="h-7 text-xs w-40">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
         {ROLES.map((r) => (
-          <SelectItem key={r.value} value={r.value}>
-            {r.label}
-          </SelectItem>
+          <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
         ))}
       </SelectContent>
     </Select>
