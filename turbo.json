@@ -1,5 +1,19 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalEnv": [
+    "DATABASE_URL",
+    "DATABASE_URL_UNPOOLED",
+    "AUTH_SECRET",
+    "AUTH_URL",
+    "OTP_PROVIDER",
+    "OTP_API_KEY",
+    "OTP_SENDER_ID",
+    "ENCRYPTION_KEY",
+    "BLOB_READ_WRITE_TOKEN",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_APP_NAME",
+    "NODE_ENV"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
