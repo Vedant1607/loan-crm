@@ -21,7 +21,7 @@ export default async function LenderLayout({
       <div className="fixed inset-y-0 left-0 w-56 bg-slate-900 flex flex-col">
         {/* Logo */}
         <div className="h-14 flex items-center px-5 border-b border-slate-700">
-          <span className="text-white font-bold text-lg">LoanFlow</span>
+          <span className="text-white font-bold text-lg">Sareen Powerz</span>
           <span className="ml-2 text-xs text-slate-400 font-medium">CRM</span>
         </div>
 

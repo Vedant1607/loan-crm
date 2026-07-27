@@ -17,7 +17,7 @@ export default async function AdminLayout({
     <div className="min-h-screen bg-slate-50">
       <div className="fixed inset-y-0 left-0 w-56 bg-slate-950 flex flex-col">
         <div className="h-14 flex items-center px-5 border-b border-slate-800">
-          <span className="text-white font-bold text-lg">LoanFlow</span>
+          <span className="text-white font-bold text-lg">Sareen Powerz</span>
           <span className="ml-2 text-xs text-amber-400 font-medium">ADMIN</span>
         </div>
 

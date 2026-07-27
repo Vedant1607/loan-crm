@@ -232,7 +232,7 @@ export default function Step5Review({ onBack, formData }: Props) {
         <CardContent className="pt-4">
           <p className="text-xs text-slate-500 leading-relaxed">
             By submitting this application, I declare that all information
-            provided is true and correct. I authorise LoanFlow and its lending
+            provided is true and correct. I authorise Sareen Powerz and its lending
             partners to verify my details, pull my credit report, and contact me
             regarding this application. I have read and agree to the{" "}
             <span className="underline">Terms & Conditions</span> and{" "}

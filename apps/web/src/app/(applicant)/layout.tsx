@@ -19,7 +19,7 @@ export default async function ApplicantLayout({
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <span className="font-bold text-slate-900 text-lg">LoanFlow</span>
+            <span className="font-bold text-slate-900 text-lg">Sareen Powerz</span>
             <nav className="flex items-center gap-4 text-sm">
               <Link
                 href="/apply"
