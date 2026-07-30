@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import {
   Card,
   CardContent,
@@ -77,7 +77,17 @@ export default function VerifyOtpPage() {
 
     // Redirect based on role — server will handle this via middleware
     sessionStorage.removeItem("otp_phone");
-    router.push("/apply");
+
+    const session = await getSession();
+    const role = session?.user?.role;
+
+    if (role === "SUPER_ADMIN") {
+      router.push("/admin/dashboard");
+    } else if (role === "LOAN_OFFICER" || role === "LENDER_ADMIN") {
+      router.push("/lender/dashboard");
+    } else {
+      router.push("/apply");
+    }
   };
 
   const handleResend = async () => {
