@@ -1,15 +1,21 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import Navbar from "@/components/landing/Navbar";
+import Hero from "@/components/landing/Hero";
+import Services from "@/components/landing/Services";
+import About from "@/components/landing/About";
+import Partners from "@/components/landing/Partners";
+import Footer from "@/components/landing/Footer";
 
-export default async function RootPage() {
-  const session = await auth();
-
-  if (!session) redirect("/login");
-
-  const role = session.user.role;
-
-  if (role === "SUPER_ADMIN") redirect("/admin/dashboard");
-  if (role === "LOAN_OFFICER" || role === "LENDER_ADMIN")
-    redirect("/lender/dashboard");
-  redirect("/apply");
+export default function LandingPage() {
+  return (
+    <div className="min-h-screen bg-brand-cream">
+      <Navbar />
+      <main>
+        <Hero />
+        <Services />
+        <Partners />
+        <About />
+      </main>
+      <Footer />
+    </div>
+  );
 }
