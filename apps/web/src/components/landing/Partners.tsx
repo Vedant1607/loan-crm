@@ -3,7 +3,7 @@ const ROW_1 = [
   { name: "ICICI Bank",       file: "icici-bank.png" },
   { name: "Kotak Mahindra",   file: "kotak-mahindra.png" },
   { name: "Axis Bank",        file: "axis-bank.png" },
-  { name: "Bajaj Finserv",    file: "bajaj-finserv.png" },
+  { name: "Bajaj Finserv",    file: "bajaj-finserv.jpg" },
   { name: "Sammaan Capital",  file: "sammaan-capital.png" },
   { name: "PNB",              file: "pnb.png" },
   { name: "HDFC Home Loans",  file: "hdfc-home-loans.png" },

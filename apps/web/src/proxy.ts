@@ -7,8 +7,11 @@ export default auth((req) => {
   const role = req.auth?.user?.role;
 
   // Public routes — always accessible
+  // Public routes — always accessible
   const publicRoutes = ["/login", "/verify-otp", "/api/auth"];
-  if (publicRoutes.some((r) => pathname.startsWith(r))) {
+  const isPublicRoute = pathname === "/" || publicRoutes.some((r) => pathname.startsWith(r));
+
+  if (isPublicRoute) {
     return NextResponse.next();
   }
 
@@ -35,5 +38,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|brand|partners).*)"],
 };

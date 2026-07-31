@@ -16,7 +16,7 @@ export default function Footer() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
               <Image
-                src="/brand/logo.svg"
+                src="/brand/logo.png"
                 alt="Sareen Powerz"
                 width={32}
                 height={32}

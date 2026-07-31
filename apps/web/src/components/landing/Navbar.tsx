@@ -24,16 +24,15 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-        scrolled
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled
           ? "bg-brand-cream/90 backdrop-blur-md border-b border-brand-navy/10 py-3"
           : "bg-transparent py-5"
-      }`}
+        }`}
     >
       <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
         <Link href="#home" className="flex items-center gap-2.5">
           <Image
-            src="/brand/logo.svg"
+            src="/brand/logo.png"
             alt="Sareen Powerz"
             width={36}
             height={36}
