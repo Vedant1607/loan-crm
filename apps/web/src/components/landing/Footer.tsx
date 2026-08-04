@@ -2,9 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 
 const QUICK_LINKS = [
-  { href: "#home",     label: "Home" },
-  { href: "#services", label: "Services" },
-  { href: "#about",    label: "About" },
+  { href: "/",         label: "Home" },
+  { href: "/services", label: "Services" },
+  { href: "/about",    label: "About" },
+  { href: "/contact",  label: "Contact" },
 ];
 
 export default function Footer() {
@@ -42,12 +43,12 @@ export default function Footer() {
               {QUICK_LINKS.map((link) => {
                 return (
                   <li key={link.href}>
-                    <a
+                    <Link
                       href={link.href}
                       className="text-sm text-white/70 hover:text-brand-gold transition-colors"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 );
               })}

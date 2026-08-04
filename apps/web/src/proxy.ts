@@ -9,7 +9,19 @@ export default auth((req) => {
   // Public routes — always accessible
   // Public routes — always accessible
   const publicRoutes = ["/login", "/verify-otp", "/api/auth"];
-  const isPublicRoute = pathname === "/" || publicRoutes.some((r) => pathname.startsWith(r));
+  const publicMarketingRoutes = [
+    "/about",
+    "/services",
+    "/contact",
+    "/privacy-policy",
+    "/terms",
+  ];
+  const isPublicRoute =
+    pathname === "/" ||
+    publicRoutes.some((r) => pathname.startsWith(r)) ||
+    publicMarketingRoutes.some(
+      (r) => pathname === r || pathname.startsWith(`${r}/`),
+    );
 
   if (isPublicRoute) {
     return NextResponse.next();
