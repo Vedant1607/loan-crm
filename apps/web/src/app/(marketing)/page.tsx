@@ -1,15 +1,21 @@
 import Hero from "@/components/landing/Hero";
-import Services from "@/components/landing/Services";
+import StatsBar from "@/components/landing/StatsBar";
+import ProcessSteps from "@/components/landing/ProcessSteps";
+import ServiceTeasers from "@/components/landing/ServiceTeasers";
+import TrustGrid from "@/components/landing/TrustGrid";
+import Testimonials from "@/components/landing/Testimonials";
 import Partners from "@/components/landing/Partners";
-import About from "@/components/landing/About";
 
 export default function HomePage() {
   return (
     <>
       <Hero />
-      <Services />
+      <StatsBar />
+      <ProcessSteps />
+      <ServiceTeasers />
+      <TrustGrid />
+      <Testimonials />
       <Partners />
-      <About />
     </>
   );
 }
