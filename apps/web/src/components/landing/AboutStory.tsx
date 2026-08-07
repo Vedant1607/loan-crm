@@ -25,35 +25,37 @@ const WHY_CHOOSE_US = [
   },
 ];
 
-export default function About() {
+export default function AboutStory() {
   return (
-    <section id="about" className="bg-brand-cream py-20 md:py-28">
+    <section className="bg-white py-20 md:py-28">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-14 items-start">
-          {/* Left — Description */}
+          {/* Left — Story */}
           <div>
             <p className="text-xs font-semibold tracking-widest uppercase text-brand-gold mb-3">
-              About Us
+              Our Story
             </p>
             <h2 className="font-display text-3xl md:text-4xl text-brand-navy font-semibold leading-tight mb-6">
-              A financial advisory partner, not just a lender
+              Financial Advisory &amp; Capital Solutions
             </h2>
             <p className="text-brand-slate leading-relaxed mb-4">
               Sareen Powerz Ltd is a financial advisory and capital solutions
               firm helping individuals, MSMEs, and businesses across India
               access the right financing — from business finance and property
-              finance to project funding and specialised restructuring.
+              finance to project funding and specialised restructuring for
+              low-CIBIL and NPA/SMA cases.
             </p>
             <p className="text-brand-slate leading-relaxed mb-8">
               Every application is matched to the lending partner best suited
               to it, and guided by a dedicated relationship manager from
-              submission to disbursal.
+              submission to disbursal — built on trusted expertise, tailored
+              solutions, and sustainable growth.
             </p>
 
-            {/* Office / Contact card */}
-            <div className="rounded-2xl border border-brand-navy/10 bg-white p-6">
+            {/* Leadership / Contact card */}
+            <div className="rounded-2xl border border-brand-navy/10 bg-brand-cream/60 p-6">
               <p className="text-xs font-semibold tracking-widest uppercase text-brand-slate mb-4">
-                Get in Touch
+                Leadership
               </p>
               <div className="space-y-3 text-sm">
                 <div>
