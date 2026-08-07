@@ -322,3 +322,26 @@ model AuditLog {
   @@index([action])
   @@map("audit_logs")
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONTACT INQUIRIES (Public contact form submissions)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+model ContactInquiry {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  loanType  LoanType?
+  message   String        @db.Text
+  status    InquiryStatus @default(NEW)
+  createdAt DateTime      @default(now())
+
+  @@map("contact_inquiries")
+}
