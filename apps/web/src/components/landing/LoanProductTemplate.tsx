@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import PageHeader from "./PageHeader";
+import EligibilityCalculator from "./EligibilityCalculator";
 
 interface Feature {
   title: string;
@@ -16,6 +17,17 @@ interface LoanProductTemplateProps {
   features: Feature[];
   eligibility: string[];
   documents: string[];
+  calculator: {
+    minAmount: number;
+    maxAmount: number;
+    defaultAmount: number;
+    minTenure: number;
+    maxTenure: number;
+    defaultTenure: number;
+    minRate: number;
+    maxRate: number;
+    defaultRate: number;
+  };
 }
 
 function CheckItem({ text }: { text: string }) {
@@ -38,12 +50,12 @@ export default function LoanProductTemplate({
   features,
   eligibility,
   documents,
+  calculator,
 }: LoanProductTemplateProps) {
   return (
     <>
       <PageHeader eyebrow={eyebrow} title={title} description={description} badge={rateBadge} />
 
-      {/* Quick Highlights */}
       <section className="bg-white py-10 border-b border-brand-navy/10">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-wrap gap-x-10 gap-y-3">
@@ -61,7 +73,6 @@ export default function LoanProductTemplate({
         </div>
       </section>
 
-      {/* Features */}
       <section className="bg-brand-cream py-20 md:py-24">
         <div className="max-w-6xl mx-auto px-6">
           <p className="text-xs font-semibold tracking-widest uppercase text-brand-gold mb-3">
@@ -98,7 +109,6 @@ export default function LoanProductTemplate({
         </div>
       </section>
 
-      {/* Eligibility + Documents */}
       <section className="bg-white py-20 md:py-24">
         <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12">
           <div>
@@ -130,7 +140,18 @@ export default function LoanProductTemplate({
         </div>
       </section>
 
-      {/* CTA Banner */}
+      <EligibilityCalculator
+        minAmount={calculator.minAmount}
+        maxAmount={calculator.maxAmount}
+        defaultAmount={calculator.defaultAmount}
+        minTenure={calculator.minTenure}
+        maxTenure={calculator.maxTenure}
+        defaultTenure={calculator.defaultTenure}
+        minRate={calculator.minRate}
+        maxRate={calculator.maxRate}
+        defaultRate={calculator.defaultRate}
+      />
+
       <section className="bg-brand-gold py-16">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>

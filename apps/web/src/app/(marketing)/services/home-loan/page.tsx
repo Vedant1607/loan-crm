@@ -3,6 +3,17 @@ import LoanProductTemplate from "@/components/landing/LoanProductTemplate";
 export default function HomeLoanPage() {
   return (
     <LoanProductTemplate
+      calculator={{
+        minAmount: 500000,
+        maxAmount: 10000000,
+        defaultAmount: 3500000,
+        minTenure: 12,
+        maxTenure: 240,
+        defaultTenure: 180,
+        minRate: 8.5,
+        maxRate: 10.5,
+        defaultRate: 8.5,
+      }}
       eyebrow="Home Loan"
       title="Own your home with the right financing"
       description="Purchase, construction, or loan against property — matched to the lending partner offering you the best terms."

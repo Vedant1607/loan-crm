@@ -3,6 +3,17 @@ import LoanProductTemplate from "@/components/landing/LoanProductTemplate";
 export default function PersonalLoanPage() {
   return (
     <LoanProductTemplate
+      calculator={{
+        minAmount: 500000,
+        maxAmount: 10000000,
+        defaultAmount: 3500000,
+        minTenure: 12,
+        maxTenure: 240,
+        defaultTenure: 180,
+        minRate: 8.5,
+        maxRate: 10.5,
+        defaultRate: 8.5,
+      }}
       eyebrow="Personal Loan"
       title="Quick finance for life's immediate needs"
       description="Minimal documentation, fast approval, and flexible end-use — for medical expenses, weddings, renovations, or emergencies."

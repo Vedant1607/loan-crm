@@ -170,3 +170,43 @@
     animation: none;
   }
 }
+
+.brand-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-brand-navy) 12%, transparent);
+  outline: none;
+}
+
+.brand-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-brand-gold);
+  border: 3px solid var(--color-brand-navy);
+  cursor: pointer;
+  transition: transform 150ms ease;
+}
+
+.brand-range::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.brand-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-brand-gold);
+  border: 3px solid var(--color-brand-navy);
+  cursor: pointer;
+}
+
+.brand-range::-moz-range-progress {
+  background: var(--color-brand-gold);
+  height: 6px;
+  border-radius: 999px;
+}

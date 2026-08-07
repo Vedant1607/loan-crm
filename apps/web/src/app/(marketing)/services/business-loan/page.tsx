@@ -3,6 +3,17 @@ import LoanProductTemplate from "@/components/landing/LoanProductTemplate";
 export default function BusinessLoanPage() {
   return (
     <LoanProductTemplate
+      calculator={{
+        minAmount: 500000,
+        maxAmount: 10000000,
+        defaultAmount: 3500000,
+        minTenure: 12,
+        maxTenure: 240,
+        defaultTenure: 180,
+        minRate: 8.5,
+        maxRate: 10.5,
+        defaultRate: 8.5,
+      }}
       eyebrow="Business Loan"
       title="Capital structured around your cash flow"
       description="Working capital, term loans, and cash credit to fuel growth — for MSMEs, startups, and established businesses."
