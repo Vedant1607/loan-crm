@@ -1,4 +1,5 @@
 import LoanProductTemplate from "@/components/landing/LoanProductTemplate";
+import { BUSINESS_LOAN_FAQS } from "@/lib/faqContent";
 
 export default function BusinessLoanPage() {
   return (
@@ -14,6 +15,7 @@ export default function BusinessLoanPage() {
         maxRate: 10.5,
         defaultRate: 8.5,
       }}
+      faqs={BUSINESS_LOAN_FAQS}
       eyebrow="Business Loan"
       title="Capital structured around your cash flow"
       description="Working capital, term loans, and cash credit to fuel growth — for MSMEs, startups, and established businesses."

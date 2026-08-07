@@ -1,4 +1,5 @@
 import LoanProductTemplate from "@/components/landing/LoanProductTemplate";
+import { PERSONAL_LOAN_FAQS } from "@/lib/faqContent";
 
 export default function PersonalLoanPage() {
   return (
@@ -14,6 +15,7 @@ export default function PersonalLoanPage() {
         maxRate: 10.5,
         defaultRate: 8.5,
       }}
+      faqs={PERSONAL_LOAN_FAQS}
       eyebrow="Personal Loan"
       title="Quick finance for life's immediate needs"
       description="Minimal documentation, fast approval, and flexible end-use — for medical expenses, weddings, renovations, or emergencies."

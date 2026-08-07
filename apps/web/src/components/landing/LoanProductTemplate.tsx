@@ -2,10 +2,16 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import PageHeader from "./PageHeader";
 import EligibilityCalculator from "./EligibilityCalculator";
+import FaqAccordion from "./FaqAccordion";
 
 interface Feature {
   title: string;
   description: string;
+}
+
+interface FaqItem {
+  question: string;
+  answer: string;
 }
 
 interface LoanProductTemplateProps {
@@ -17,6 +23,7 @@ interface LoanProductTemplateProps {
   features: Feature[];
   eligibility: string[];
   documents: string[];
+  faqs: FaqItem[];
   calculator: {
     minAmount: number;
     maxAmount: number;
@@ -50,6 +57,7 @@ export default function LoanProductTemplate({
   features,
   eligibility,
   documents,
+  faqs,
   calculator,
 }: LoanProductTemplateProps) {
   return (
@@ -151,6 +159,8 @@ export default function LoanProductTemplate({
         maxRate={calculator.maxRate}
         defaultRate={calculator.defaultRate}
       />
+
+      <FaqAccordion items={faqs} />
 
       <section className="bg-brand-gold py-16">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">

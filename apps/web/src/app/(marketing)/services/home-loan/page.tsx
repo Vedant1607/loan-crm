@@ -1,4 +1,5 @@
 import LoanProductTemplate from "@/components/landing/LoanProductTemplate";
+import { HOME_LOAN_FAQS } from "@/lib/faqContent";
 
 export default function HomeLoanPage() {
   return (
@@ -14,6 +15,7 @@ export default function HomeLoanPage() {
         maxRate: 10.5,
         defaultRate: 8.5,
       }}
+      faqs={HOME_LOAN_FAQS}
       eyebrow="Home Loan"
       title="Own your home with the right financing"
       description="Purchase, construction, or loan against property — matched to the lending partner offering you the best terms."
