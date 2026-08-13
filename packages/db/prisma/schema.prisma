@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url  	    = env("DATABASE_URL")
+  url       = env("DATABASE_URL")
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
@@ -149,29 +149,29 @@ model OtpRecord {
 // ─── LENDERS ──────────────────────────────────────────────────────────────────
 
 model Lender {
-  id                   String    @id @default(cuid())
-  referenceId          String    @unique
+  id                   String     @id @default(cuid())
+  referenceId          String     @unique
   name                 String
-  shortCode            String    @unique
+  shortCode            String     @unique
   logoUrl              String?
   loanTypes            LoanType[]
   regions              String[]
-  isPanIndia           Boolean   @default(false)
+  isPanIndia           Boolean    @default(false)
   minAmount            Float
   maxAmount            Float
   minTenureMonths      Int
   maxTenureMonths      Int
   interestRateMin      Float
   interestRateMax      Float
-  processingFeePercent Float     @default(1.0)
+  processingFeePercent Float      @default(1.0)
   registrationNo       String?
   gstin                String?
   grievanceEmail       String?
   grievancePhone       String?
   websiteUrl           String?
-  isActive             Boolean   @default(true)
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  isActive             Boolean    @default(true)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
 
   applications LoanApplication[]
   officers     LenderOfficer[]
@@ -193,60 +193,62 @@ model LenderOfficer {
 // ─── LOAN APPLICATIONS ────────────────────────────────────────────────────────
 
 model LoanApplication {
-  id                    String            @id @default(cuid())
-  applicationNo         String            @unique
-  applicantId           String
-  lenderId              String
-  officerId             String?
-  loanType              LoanType
-  loanAmount            Float
-  tenureMonths          Int
-  purpose               String
-  status                ApplicationStatus @default(DRAFT)
-  applicantName         String
-  dob                   DateTime
-  gender                GenderType?
-  address               String
-  city                  String
-  state                 String
-  pincode               String
-  panEncrypted          String
-  aadhaarLast4          String
-  employmentType        EmploymentType
-  employerName          String?
-  monthlyIncome         Float
-  existingEmiObligations Float            @default(0)
-  businessName          String?
-  businessType          String?
-  gstNumber             String?
-  businessVintage       Int?
-  annualTurnover        Float?
-  propertyAddress       String?
-  propertyValue         Float?
-  vehicleMake           String?
-  vehicleModel          String?
-  vehicleYear           Int?
-  vehiclePrice          Float?
-  sanctionedAmount      Float?
-  sanctionedTenure      Int?
-  sanctionedRate        Float?
-  officerNotes          String?           @db.Text
-  rejectionReason       String?           @db.Text
-  conditionsForApproval String?           @db.Text
-  aiAnalysisMongoId     String?
-  aiRiskScore           Float?
-  aiRecommendation      String?
-  aiAnalyzedAt          DateTime?
-  submittedAt           DateTime?
-  reviewedAt            DateTime?
-  decisionAt            DateTime?
-  disbursedAt           DateTime?
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
+  id                     String            @id @default(cuid())
+  applicationNo          String            @unique
+  applicantId            String
+  lenderId               String
+  officerId              String?
+  loanType               LoanType
+  loanAmount             Float
+  tenureMonths           Int
+  purpose                String
+  status                 ApplicationStatus @default(DRAFT)
+  applicantName          String
+  dob                    DateTime
+  gender                 GenderType?
+  address                String
+  city                   String
+  state                  String
+  pincode                String
+  panEncrypted           String
+  aadhaarLast4           String
+  employmentType         EmploymentType
+  employerName           String?
+  monthlyIncome          Float
+  existingEmiObligations Float             @default(0)
+  businessName           String?
+  businessType           String?
+  gstNumber              String?
+  businessVintage        Int?
+  annualTurnover         Float?
+  propertyAddress        String?
+  propertyValue          Float?
+  vehicleMake            String?
+  vehicleModel           String?
+  vehicleYear            Int?
+  vehiclePrice           Float?
+  sanctionedAmount       Float?
+  sanctionedTenure       Int?
+  sanctionedRate         Float?
+  officerNotes           String?           @db.Text
+  rejectionReason        String?           @db.Text
+  conditionsForApproval  String?           @db.Text
+  aiAnalysisMongoId      String?
+  aiRiskScore            Float?
+  aiRecommendation       String?
+  aiAnalyzedAt           DateTime?
+  submittedAt            DateTime?
+  reviewedAt             DateTime?
+  decisionAt             DateTime?
+  disbursedAt            DateTime?
+  closedAt               DateTime?
+  lifecycleNote          String?           @db.Text
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
 
-  applicant   User            @relation("ApplicantApplications", fields: [applicantId], references: [id])
-  lender      Lender          @relation(fields: [lenderId], references: [id])
-  officer     User?           @relation("OfficerApplications", fields: [officerId], references: [id])
+  applicant   User           @relation("ApplicantApplications", fields: [applicantId], references: [id])
+  lender      Lender         @relation(fields: [lenderId], references: [id])
+  officer     User?          @relation("OfficerApplications", fields: [officerId], references: [id])
   documents   LoanDocument[]
   emiSchedule EmiSchedule[]
   auditLogs   AuditLog[]
@@ -302,17 +304,17 @@ model EmiSchedule {
 // ─── AUDIT LOG ────────────────────────────────────────────────────────────────
 
 model AuditLog {
-  id            String   @id @default(cuid())
-  userId        String
-  action        String
-  entity        String
-  entityId      String
-  oldValue      Json?
-  newValue      Json?
-  metadata      Json?
-  ipAddress     String?
-  userAgent     String?
-  createdAt     DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  entity    String
+  entityId  String
+  oldValue  Json?
+  newValue  Json?
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
 
   user        User             @relation(fields: [userId], references: [id])
   application LoanApplication? @relation(fields: [entityId], references: [id])
