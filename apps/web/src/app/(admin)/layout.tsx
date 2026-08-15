@@ -26,8 +26,10 @@ export default async function AdminLayout({
             { href: "/admin/dashboard", icon: "📊", label: "Dashboard" },
             { href: "/admin/lenders", icon: "🏦", label: "Lenders" },
             { href: "/admin/users", icon: "👤", label: "Users" },
+            { href: "/admin/inquiries",  icon: "✉️", label: "Inquiries" },
             { href: "/admin/reports", icon: "📈", label: "Reports" },
-          ].map((item) => (
+          ].map((item) => {
+            return (
             <Link
               key={item.href}
               href={item.href}
@@ -36,7 +38,8 @@ export default async function AdminLayout({
               <span>{item.icon}</span>
               <span>{item.label}</span>
             </Link>
-          ))}
+            );
+          })}
         </nav>
 
         <div className="p-3 border-t border-slate-800">
