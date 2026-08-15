@@ -8,6 +8,7 @@ import DecisionPanel from "@/components/dashboard/DecisionPanel";
 import AIAnalysisReport from "@/components/dashboard/AIAnalysisReport";
 import RevealPanButton from "@/components/dashboard/RevealPanButton";
 import DocumentVerifyControls from "@/components/dashboard/DocumentVerifyControls";
+import LifecycleControls from "@/components/dashboard/LifecycleControls";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -249,8 +250,15 @@ export default async function ApplicationDetailPage({ params }: Props) {
           />
         </div>
 
-        <div className="col-span-1">
+        <div className="col-span-1 space-y-5">
           <DecisionPanel application={{ id: app.id, status: app.status }} />
+          <LifecycleControls
+            applicationId={app.id}
+            status={app.status}
+            disbursedAt={app.disbursedAt}
+            closedAt={app.closedAt}
+            lifecycleNote={app.lifecycleNote}
+          />
         </div>
       </div>
     </div>
